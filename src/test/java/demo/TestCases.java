@@ -10,15 +10,18 @@ import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import demo.wrappers.Wrappers;
+import org.w3c.dom.stylesheets.LinkStyle;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Level;
 // import io.github.bonigarcia.wdm.WebDriverManager;
 
@@ -34,35 +37,36 @@ public class TestCases {
     @Test
     public void testCase01() throws InterruptedException {
 
-        System.out.println("Start TestCase 01");
+        System.out.println("Start Test case: testCase01");
+
         wrapper = new Wrappers(driver);
         wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+
         String url = "https://docs.google.com/forms/d/e/1FAIpQLSep9LTMntH5YqIXa5nkiPKSs283kdwitBBhXWyZdAS-e4CxBQ/viewform";
         wrapper.navigateToUrl(url);
 
-        WebElement nameField = driver.findElement(By.xpath("(//input[@class='whsOnd zHQkBf'])[1]"));
+        WebElement nameField = driver.findElement(By.xpath("//div[@class='o3Dpx']/div[1]//input"));
         wrapper.sendText(nameField, "Crio Learner");
 
-        WebElement textArea = driver.findElement(By.xpath("//textarea[@aria-label='Your answer']"));
+        WebElement textArea = driver.findElement(By.xpath("//div[@class='o3Dpx']/div[2]//textarea"));
         wrapper.sendText(textArea, "I want to be the best QA Engineer! 1710572021");
 
-        WebElement experience = driver.findElement(By.xpath("(//div[@class='vd3tt'])[2]"));
-        wrapper.clickOnElement(experience);
+        List<WebElement> radioButtons = driver.findElements(By.xpath("//div[@class='SG0AAe']/div//span"));
+        for (WebElement element : radioButtons) {
+            String text = element.getText();
+            if (text.contains("3 - 5")) {
+                wrapper.clickOnElement(element);
+                break;
+            }
+        }
 
         System.out.println("Select checkboxes");
-        WebElement javaCheckBox = driver.findElement(By.xpath("(//div[@class = 'uHMk6b fsHoPb'])[1]"));
-        if (!javaCheckBox.isSelected()) {
-            wrapper.clickOnElement(javaCheckBox);
-        }
-
-        WebElement seleniumCheckBox = driver.findElement(By.xpath("(//div[@class = 'uHMk6b fsHoPb'])[2]"));
-        if (!seleniumCheckBox.isSelected()) {
-            wrapper.clickOnElement(seleniumCheckBox);
-        }
-
-        WebElement testNgCheckBox = driver.findElement(By.xpath("(//div[@class = 'uHMk6b fsHoPb'])[4]"));
-        if (!testNgCheckBox.isSelected()) {
-            wrapper.clickOnElement(testNgCheckBox);
+        List<WebElement> checkBoxes = driver.findElements(By.xpath("//div[@class='eBFwI']//div[@class='ulDsOb']"));
+        for (WebElement el : checkBoxes) {
+            String text = el.getText();
+            if (!text.contains("Springboot")) {
+                wrapper.clickOnElement(el);
+            }
         }
 
         WebElement dropdown = driver.findElement(By.className("ry3kXd"));
@@ -70,7 +74,7 @@ public class TestCases {
         Thread.sleep(1000);
 
         System.out.println("Selecting dropdown option");
-        WebElement option = driver.findElement(By.xpath("//div[@role='option']//span[@class='vRMGwf oJeWuf'][normalize-space()='Mr']"));
+        WebElement option = driver.findElement(By.xpath("//div[contains(@class,'ncFHed ')]/div[3]"));
         wait.until(ExpectedConditions.elementToBeClickable(option));
         wrapper.clickOnElement(option);
 
@@ -88,19 +92,18 @@ public class TestCases {
         wrapper.sendText(dateField, pastDateString);
 
         WebElement hour = driver.findElement(By.xpath("//input[@aria-label='Hour']"));
-        wrapper.sendText(hour, "07");
         WebElement minute = driver.findElement(By.xpath("//input[@aria-label='Minute']"));
-        wrapper.sendText(minute, "30");
-
         WebElement submitButton = driver.findElement(By.xpath("(//span[@class = 'l4V7wb Fxmcue'])[1]"));
+
+        wrapper.sendText(hour, "07");
+        wrapper.sendText(minute, "30");
         wrapper.clickOnElement(submitButton);
 
         WebElement responseText = driver.findElement(By.xpath("//div[@class='vHW8K']"));
-        System.out.println(responseText.getText());
-        if (responseText.getText().contains("Thanks")) {
-            System.out.println("Form submitted successfully");
-        }
-        System.out.println("Start TestCase 02");
+        String expectedTExt = "Thanks for your response, Automation Wizard!";
+        Assert.assertEquals(responseText.getText(), expectedTExt);
+
+        System.out.println("End Test case: testCase01");
     }
 
     /*
